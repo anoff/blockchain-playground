@@ -6,6 +6,7 @@ import numpy
 
 # fetch market price data
 r = requests.get('https://api.blockchain.info/charts/market-price?timespan=2years&rollingAverage=1days')
+# alternative: http://api.coindesk.com/v1/bpi/historical/close.json?currency=EUR&start=2013-01-01&end=2017-01-01
 data = r.json()['values']
 
 x = [elm['x'] for elm in data]
@@ -29,6 +30,18 @@ reg_error = numpy.mean(numpy.absolute(errors))
 # print(reg_error)
 #exit()
 
+# calculate price in one year
+forecast = [30, 90, 180, 365] # forecast in days
+win = [1.5, 2] # when will it reach X of current value
+
+startValue = numpy.mean(y[-5:])
+for days in forecast:
+    value = startValue + days * slope;
+    print('BTC will reach {0:.1f} in {1:.0f} days'.format(value, days))
+
+for val in win:
+    days = startValue * (val - 1) / slope
+    print('BTC price will reach {0:.0f}% (base: {1:.1f}) in {2:.0f} days'.format(val*100, startValue, days))
 
 # plot
 fg, ax = plt.subplots()
