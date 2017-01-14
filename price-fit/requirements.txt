@@ -1,0 +1,4 @@
+requests
+scipy
+matplotlib
+numpy
