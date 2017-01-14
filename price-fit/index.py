@@ -4,17 +4,23 @@ import datetime
 from scipy import stats
 import numpy
 
-# fetch market price data
-r = requests.get('https://api.blockchain.info/charts/market-price?timespan=2years&rollingAverage=1days')
-# alternative: http://api.coindesk.com/v1/bpi/historical/close.json?currency=EUR&start=2013-01-01&end=2017-01-01
-data = r.json()['values']
+start_date = '2013-01-01'
+regression_ranges = [7, 30, 90, 365]
 
-x = [elm['x'] for elm in data]
-y = [elm['y'] for elm in data]
-
+r = requests.get('http://api.coindesk.com/v1/bpi/historical/close.json?currency=EUR&start={1}&end={0}'
+.format(datetime.date.today().isoformat(), start_date))
+data = r.json()['bpi']
+x = list(data.keys())
+x.sort()
+y = [data[e] for e in x]
 # transform to date
-t = [datetime.date.fromtimestamp(elm) for elm in x]
+t = [datetime.datetime.strptime(elm, '%Y-%m-%d') for elm in x]
 dt = [(elm - t[0]).days for elm in t]
+
+
+print(x.index('2015-01-01'))
+
+exit()
 
 # linear regression
 slope, intercept, r_value, p_value, std_err = stats.linregress(dt, y)
