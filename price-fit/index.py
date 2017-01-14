@@ -2,7 +2,7 @@ import requests
 import matplotlib.pyplot as plt
 import datetime
 from scipy import stats
-from scipy import std
+import numpy
 
 # fetch market price data
 r = requests.get('https://api.blockchain.info/charts/market-price?timespan=2years&rollingAverage=1days')
@@ -15,33 +15,28 @@ y = [elm['y'] for elm in data]
 t = [datetime.date.fromtimestamp(elm) for elm in x]
 dt = [(elm - t[0]).days for elm in t]
 
+# linear regression
 slope, intercept, r_value, p_value, std_err = stats.linregress(dt, y)
-
-print(slope, intercept, r_value, p_value, std_err)
+# print(slope, intercept, r_value, p_value, std_err)
 
 # regression at random point
 def regY(x):
     return intercept + x*slope
 
 # std error
-#errors = [elm - regY(x[y.index(elm)]) for elm in y]
-errors = []
-for i in dt:
-    val = y[i] - regY(i)
-    errors.append(val)
-
-print(errors)
-reg_error = std(errors)
-print(reg_error)
+errors = [y[i] - regY(i) for i in dt]
+reg_error = numpy.mean(numpy.absolute(errors))
+# print(reg_error)
 #exit()
 
 
 # plot
 fg, ax = plt.subplots()
 ax.plot(dt, y)
-ax.plot([0, dt[-1]], [regY(0), regY(dt[-1])])
-ax.plot([0, dt[-1]], [regY(0) - reg_error, regY(dt[-1]) - reg_error], 'r--')
-ax.plot([0, dt[-1]], [regY(0) + reg_error, regY(dt[-1]) + reg_error], 'r--')
+x_min, x_max = ax.get_xlim()
+ax.plot([0, x_max], [regY(0), regY(x_max)])
+ax.plot([0, x_max], [regY(0) - reg_error, regY(x_max) - reg_error], 'r--')
+ax.plot([0, x_max], [regY(0) + reg_error, regY(x_max) + reg_error], 'r--')
 ax.set_ylabel('price [USD]')
 ax.set_xlabel('time')
 ax.grid(True)
