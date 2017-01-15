@@ -37,7 +37,9 @@ Run the index file after installation with `python index.py`.
 
 ## price-fit
 
-> plot projected market values will be
+> fit price data and extrapolated
+
+![extrapolated prices](./price-fit/price_fit.png)
 
 * get latest bitcoin market price data
 * plot regression with mean deviations as expected min/max values

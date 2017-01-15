@@ -7,7 +7,7 @@ import numpy
 
 start_date = '2013-01-01'
 end_date = datetime.date.today().isoformat()
-fit_ranges = [30, 90, 180, 360, 720] # ranges in days that should show up as individual linear regressions
+fit_ranges = [30, 90, 180, 360] # ranges in days that should show up as individual linear regressions
 fit_forecast = 180 # how many days the fittet curves should be extrapolated
 r = requests.get('http://api.coindesk.com/v1/bpi/historical/close.json?currency=EUR&start={1}&end={0}'
 .format(end_date, start_date))
@@ -38,14 +38,17 @@ ax.plot(fit_x, fit_y - reg_error, 'k--')
 
 # fit ranges
 color=iter(plt.cm.rainbow(np.linspace(0,1,len(fit_ranges))))
-for start in fit_ranges:
-    tr = range(start)
-    yr = y[-start:]
+cnt = 0
+for fit_range in fit_ranges:
+    tr = range(fit_range)
+    yr = y[-fit_range:]
     coeff = np.polyfit(tr, yr, 2)
-    tr = range(start + fit_forecast)
+    tr = range(fit_range + fit_forecast)
     fit = [coeff[0] * (e ** 2) + coeff[1] * e + coeff[2] for e in tr]
-    # print(start, sr, ir, y0, y1)
-    ax.plot([e + dt[-start] for e in tr], fit, c=next(color))
+    c = next(color)
+    ax.plot([e + dt[-fit_range] for e in tr], fit, c=c)
+    ax.text(30, 2000 - (1 + cnt) * 100, '{0} days fitted'.format(fit_range), color=c, fontsize=10)
+    cnt += 1
 
 ax.set_ylabel('price [USD]')
 ax.set_xlabel('time')
@@ -57,4 +60,4 @@ ax.set_xticklabels(xlabels)
 ax.set_ylim(0, 2000)
 ax.set_xlim(0, dt[-1] + fit_forecast)
 
-fg.savefig('temp.png', dpi=300)
+fg.savefig('price_fit.png', dpi=200)
